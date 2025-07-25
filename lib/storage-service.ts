@@ -26,10 +26,12 @@ export class StorageService {
       if (!stored) return [];
       
       const sessions = JSON.parse(stored);
+      //eslint-disable-next-line @typescript-eslint/no-explicit-any
       return sessions.map((session: any) => ({
         ...session,
         createdAt: new Date(session.createdAt),
         updatedAt: new Date(session.updatedAt),
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         messages: session.messages.map((msg: any) => ({
           ...msg,
           timestamp: new Date(msg.timestamp),

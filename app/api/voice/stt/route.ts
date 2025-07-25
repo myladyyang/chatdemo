@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
     try {
       // 按照官方示例调用API
       const transcription = await cozeClient.audio.transcriptions.create({
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         file: fileStream as any,
       });
 
@@ -110,6 +111,7 @@ export async function POST(request: NextRequest) {
         fs.unlinkSync(tempFilePath);
       }
     } catch (cleanupError) {
+      console.error('STT API: 清理临时文件失败', cleanupError);
       // 忽略清理错误
     }
     
