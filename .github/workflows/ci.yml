@@ -111,15 +111,7 @@ jobs:
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ steps.vars.outputs.repo_name }}:${{ steps.vars.outputs.new_version }}
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ steps.vars.outputs.repo_name }}:latest
 
-      - name: Build and push Docker image for worker
-        run: |
-          # 构建worker镜像
-          docker build -t ${{ vars.DOCKER_REGISTRY }}/${{ steps.vars.outputs.repo_name }}-worker:${{ steps.vars.outputs.new_version }} -f Dockerfile.worker .
-          docker tag ${{ vars.DOCKER_REGISTRY }}/${{ steps.vars.outputs.repo_name }}-worker:${{ steps.vars.outputs.new_version }} ${{ vars.DOCKER_REGISTRY }}/${{ steps.vars.outputs.repo_name }}-worker:latest
-          
-          # 推送worker镜像
-          docker push ${{ vars.DOCKER_REGISTRY }}/${{ steps.vars.outputs.repo_name }}-worker:${{ steps.vars.outputs.new_version }}
-          docker push ${{ vars.DOCKER_REGISTRY }}/${{ steps.vars.outputs.repo_name }}-worker:latest
+
 
       - name: Create and push git tag
         run: |
