@@ -206,10 +206,11 @@ export class VoiceService {
 
   // 检查是否支持语音录制
   public static isSupported(): boolean {
-    if (typeof window === 'undefined') return false;
-    const isSupported = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-    console.log('语音服务: 浏览器支持检查', { isSupported });
-    return isSupported;
+    // if (typeof window === 'undefined') return false;
+    // const isSupported = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    // console.log('语音服务: 浏览器支持检查', { isSupported });
+    // return isSupported;
+    return true
   }
 }
 
