@@ -6,7 +6,7 @@ import { Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface InputAreaProps {
-  onSendMessage: (message: string) => void;
+  onSendMessage: (message: string, audioBlob?: Blob) => void;
   onImageUpload: (file: File) => void;
   isLoading: boolean;
 }
@@ -71,7 +71,8 @@ export default function InputArea({
       // 发送音频到服务器进行识别
       const text = await sendAudioForTranscription(audioBlob);
       if (text) {
-        onSendMessage(text);
+        // 发送文本和原始音频Blob
+        onSendMessage(text, audioBlob);
       }
     }
   };

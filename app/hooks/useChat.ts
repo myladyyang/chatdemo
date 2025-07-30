@@ -8,6 +8,8 @@ export interface Message {
   role: 'user' | 'assistant';
   timestamp: Date;
   content_type?: ContentType;
+  audioBlob?: Blob; // 用户原始音频
+  showText?: boolean; // 是否显示文字内容
 }
 
 export function useChat() {
@@ -15,10 +17,9 @@ export function useChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const { playText, stopPlaying } = useVoiceOutput();
-  const [autoPlayVoice, setAutoPlayVoice] = useState(false);
+  const { stopPlaying } = useVoiceOutput();
 
-  const sendMessage = useCallback(async (messageContent: string) => {
+  const sendMessage = useCallback(async (messageContent: string, audioBlob?: Blob) => {
     if (!messageContent.trim() || isLoading) return;
 
     const userMessage: Message = {
@@ -26,6 +27,7 @@ export function useChat() {
       content: messageContent,
       role: 'user',
       timestamp: new Date(),
+      audioBlob: audioBlob, // 保存用户原始音频
     };
 
     const newMessages = [...messages, userMessage];
@@ -44,7 +46,7 @@ export function useChat() {
         },
         body: JSON.stringify({
           message: messageContent,
-          userId: 'user_' + Math.random().toString(36).substr(2, 9),
+          userId: 'user_luffy',
           chatHistory: messages,
           conversationId: conversationId
         }),
@@ -109,11 +111,6 @@ export function useChat() {
                     console.log("保存会话ID:", data.conversation_id);
                     setConversationId(data.conversation_id);
                   }
-                  
-                  // 如果启用了自动语音播放，播放最新的回复
-                  if (autoPlayVoice && assistantMessage.content) {
-                    playText(assistantMessage.content);
-                  }
                 } else if (data.type === 'meta' && data.conversation_id) {
                   console.log("收到元数据 - 会话ID:", data.conversation_id);
                   setConversationId(data.conversation_id);
@@ -161,7 +158,7 @@ export function useChat() {
       setIsLoading(false);
       abortControllerRef.current = null;
     }
-  }, [messages, isLoading, conversationId, autoPlayVoice, playText]);
+  }, [messages, isLoading, conversationId]);
 
   const clearMessages = useCallback(() => {
     setMessages([]);
@@ -184,10 +181,6 @@ export function useChat() {
     stopPlaying(); // 停止当前语音播放
   }, [stopPlaying]);
 
-  const toggleAutoPlayVoice = useCallback(() => {
-    setAutoPlayVoice(prev => !prev);
-  }, []);
-
   // 导出setIsLoading函数
   const updateIsLoading = useCallback((loading: boolean) => {
     setIsLoading(loading);
@@ -197,11 +190,9 @@ export function useChat() {
     messages,
     isLoading,
     conversationId,
-    autoPlayVoice,
     sendMessage,
     clearMessages,
     stopGeneration,
-    toggleAutoPlayVoice,
     setIsLoading: updateIsLoading,
     setCozeMessages,
     setActiveConversation,

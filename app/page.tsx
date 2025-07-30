@@ -16,8 +16,6 @@ export default function Home() {
     conversationId,
     sendMessage, 
     clearMessages, 
-    autoPlayVoice,
-    toggleAutoPlayVoice,
     setIsLoading,
     setCozeMessages,
     setActiveConversation
@@ -116,11 +114,12 @@ export default function Home() {
         <ChatArea 
           messages={messages} 
           isLoading={isLoading} 
-          autoPlayVoice={autoPlayVoice}
-          onToggleAutoPlayVoice={toggleAutoPlayVoice}
         />
         <InputArea 
-          onSendMessage={sendMessage} 
+          onSendMessage={(text, audioBlob) => {
+            // 将文本和音频Blob一起传递给sendMessage
+            sendMessage(text, audioBlob);
+          }} 
           onImageUpload={(file) => console.log('Image upload:', file)} 
           isLoading={isLoading} 
         />

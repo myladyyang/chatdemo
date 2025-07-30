@@ -1,6 +1,7 @@
 export class AudioService {
   private audio: HTMLAudioElement | null = null;
   private isPlaying = false;
+  private audioDuration = 0;
 
   // 文本转语音并播放
   async playText(text: string, voiceId?: string): Promise<void> {
@@ -34,6 +35,33 @@ export class AudioService {
       const audioUrl = URL.createObjectURL(audioBlob);
       
       this.audio = new Audio(audioUrl);
+      
+      // 等待音频加载以获取实际时长
+      await new Promise<void>((resolve) => {
+        if (!this.audio) {
+          resolve();
+          return;
+        }
+        
+        this.audio.onloadedmetadata = () => {
+          if (this.audio) {
+            this.audioDuration = this.audio.duration;
+            console.log('音频加载完成，时长:', this.audioDuration);
+          }
+          resolve();
+        };
+        
+        // 如果加载超时，使用估算时长
+        setTimeout(() => {
+          if (!this.audioDuration && this.audio) {
+            // 估算时长（每个字符约0.1秒）
+            this.audioDuration = Math.max(2, Math.min(60, text.length * 0.1));
+            console.log('音频加载超时，使用估算时长:', this.audioDuration);
+          }
+          resolve();
+        }, 1000);
+      });
+      
       this.isPlaying = true;
 
       // 设置音频事件监听器
@@ -87,6 +115,29 @@ export class AudioService {
   // 获取播放状态
   getIsPlaying(): boolean {
     return this.isPlaying;
+  }
+  
+  // 获取当前音频时长
+  getAudioDuration(): number {
+    if (this.audio && this.audio.duration && !isNaN(this.audio.duration) && isFinite(this.audio.duration)) {
+      return this.audio.duration;
+    }
+    // 确保返回有效数值
+    return this.audioDuration > 0 && isFinite(this.audioDuration) ? this.audioDuration : 0;
+  }
+  
+  // 获取当前播放进度（0-100）
+  getPlayProgress(): number {
+    if (!this.audio || !this.isPlaying) return 0;
+    if (this.audio.duration <= 0) return 0;
+    
+    return (this.audio.currentTime / this.audio.duration) * 100;
+  }
+  
+  // 获取当前播放时间
+  getCurrentTime(): number {
+    if (!this.audio) return 0;
+    return this.audio.currentTime;
   }
 
   // 清理资源
